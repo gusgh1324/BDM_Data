@@ -36,3 +36,12 @@ CNN 모델 활용 이미지 분류(tensorflow)
 
 이미지 딥러닝(Transfer Learning2)
 : https://hangjastar.tistory.com/193
+
+이미지 딥러닝(샴 네트워크3)
+: https://jayhey.github.io/deep%20learning/2018/02/06/saimese_network/
+
+이미지 딥러닝(샴 네트워크4)
+: https://sorenbouma.github.io/blog/oneshot/
+
+이미지 딥러닝(mete learning)
+: https://kalelpark.tistory.com/29

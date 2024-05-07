@@ -21,3 +21,18 @@ CNN 모델 활용 이미지 분류(tensorflow)
 
 이미지 딥러닝3
 : https://github.com/boringariel/Tensorflow/blob/master/%ED%85%90%EC%84%9C%ED%94%8C%EB%A1%9C%EC%9A%B0%EB%A5%BC%20%EC%9D%B4%EC%9A%A9%ED%95%9C%20%EC%82%AC%EC%A7%84%20%EB%B6%84%EB%A5%98%20%EB%94%A5%EB%9F%AC%EB%8B%9D%20%EB%AA%A8%EB%8D%B8%20%EB%A7%8C%EB%93%A4%EA%B8%B0.ipynb
+
+이미지 딥러닝(pytorch)
+: https://97yong.github.io/dl%20code/imageclassification/
+
+이미지 딥러닝(샴 네트워크)
+: https://metar.tistory.com/entry/%EC%BD%94%EB%9E%A9%EC%9D%84-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EC%83%B4-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC-%EA%B5%AC%ED%98%84
+
+이미지 딥러닝(Transfer Learning)
+: https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html
+
+이미지 딥러닝(샴 네트워크2)
+: https://hipolarbear.tistory.com/25
+
+이미지 딥러닝(Transfer Learning2)
+: https://hangjastar.tistory.com/193

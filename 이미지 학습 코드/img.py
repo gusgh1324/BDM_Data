@@ -10,13 +10,17 @@ import shutil
 
 # 차트 한글 표시
 import matplotlib.pyplot as plt
-plt.rcParams['font.family'] ='Malgun Gothic'
-plt.rcParams['axes.unicode_minus'] =False
+from keras.api import layers
+
+plt.rcParams['font.family'] = 'Malgun Gothic'
+plt.rcParams['axes.unicode_minus'] = False
+
+# CNN모델
 
 # 기본 경로
 base_dir = 'train_dataset'
 train_dir = os.path.join(base_dir, 'train')
-validation_dir = os.path.join(base_dir, 'validation')
+# validation_dir = os.path.join(base_dir, 'validation')
 test_dir = os.path.join(base_dir, 'test')
 
 # 훈련용 이미지 파일 이름 조회
@@ -26,9 +30,9 @@ for fish_class in train_fish_classes:
     train_fish_fnames[fish_class] = os.listdir(os.path.join(train_dir, fish_class))
 
 # 검증용 이미지 파일 이름 조회
-validation_fish_fnames = {}
-for fish_class in train_fish_classes:
-    validation_fish_fnames[fish_class] = os.listdir(os.path.join(validation_dir, fish_class))
+# validation_fish_fnames = {}
+# for fish_class in train_fish_classes:
+#     validation_fish_fnames[fish_class] = os.listdir(os.path.join(validation_dir, fish_class))
 
 # 테스트용 이미지 파일 이름 조회
 test_fish_fnames = {}
@@ -40,46 +44,57 @@ from tensorflow.keras.preprocessing import image
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # Image augmentation
-train_datagen = ImageDataGenerator(rescale=1./255,
-                                   rotation_range=25,
-                                   width_shift_range=0.05,
-                                   height_shift_range=0.05,
-                                   zoom_range=0.2,
-                                   horizontal_flip=True,
-                                   vertical_flip=True,
-                                   fill_mode='nearest')
+train_datagen = ImageDataGenerator(
+    rescale=1. / 255,
+    rotation_range=45,  # 이미지를 최대 45도까지 회전
+    width_shift_range=0.2,  # 최대 20%의 너비 이동
+    height_shift_range=0.2,  # 최대 20%의 높이 이동
+    shear_range=0.2,  # 최대 20%의 전단 변형
+    zoom_range=0.2,  # 최대 20%의 확대/축소
+    horizontal_flip=True,  # 수평 뒤집기
+    vertical_flip=True,  # 수직 뒤집기
+    fill_mode='nearest',  # 이미지 변환 후 생기는 빈 공간을 채우는 방법
+    brightness_range=[0.5, 1.5],
+    validation_split=0.2
+    # validation_set으로 쓸 데이터의 비율을 정한다.
+    # 만약 값이 정해져 있다면 후에 사용할 flow_from_directory나 flow_from_dataframe에서 파라미터 subset = 'training' 혹은 subset = 'validation'으로
+    # 훈련 데이터 셋과 검증 데이터 셋을 줄 수 있다.
+)
 # validation 및 test 이미지는 augmentation을 적용하지 않는다;
 # 모델 성능을 평가할 때에는 이미지 원본을 사용 (rescale만 진행)
-validation_datagen = ImageDataGenerator(rescale=1./255)
-test_datagen = ImageDataGenerator(rescale=1./255)
+validation_datagen = ImageDataGenerator(rescale=1. / 255)
+test_datagen = ImageDataGenerator(rescale=1. / 255)
 
 # flow_from_directory() 메서드를 이용해서 훈련과 테스트에 사용될 이미지 데이터를 만들기
 train_generator = train_datagen.flow_from_directory(train_dir,
                                                     batch_size=16,
                                                     color_mode='grayscale',
                                                     class_mode='categorical',
-                                                    target_size=(150,150))
+                                                    target_size=(150, 150),
+                                                    subset='training')
 
-validation_generator = validation_datagen.flow_from_directory(validation_dir,
-                                                              batch_size=4,
-                                                              color_mode='grayscale',
-                                                              class_mode='categorical',
-                                                              target_size=(150,150))
+validation_generator = train_datagen.flow_from_directory(train_dir,
+                                                         batch_size=4,
+                                                         color_mode='grayscale',
+                                                         class_mode='categorical',
+                                                         target_size=(150, 150),
+                                                         subset='validation')
 
 test_generator = test_datagen.flow_from_directory(test_dir,
                                                   batch_size=4,
                                                   color_mode='grayscale',
                                                   class_mode='categorical',
-                                                  target_size=(150,150))
+                                                  target_size=(150, 150))
 
 # 합성곱 신경망 모델 구성하기
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Conv2D(16, (3,3), activation='relu', input_shape=(150, 150, 1)),
-    tf.keras.layers.MaxPooling2D(2,2),
-    tf.keras.layers.Conv2D(32, (3,3), activation='relu'),
-    tf.keras.layers.MaxPooling2D(2,2),
-    tf.keras.layers.Conv2D(32, (3,3), activation='relu'),
-    tf.keras.layers.MaxPooling2D(2,2),
+    tf.keras.layers.Conv2D(16, (3, 3), activation='relu', input_shape=(150, 150, 1)),
+    tf.keras.layers.MaxPooling2D(2, 2),
+    tf.keras.layers.Conv2D(32, (3, 3), activation='relu'),
+    tf.keras.layers.MaxPooling2D(2, 2),
+    tf.keras.layers.Conv2D(32, (3, 3), activation='relu'),
+    tf.keras.layers.MaxPooling2D(2, 2),
+    layers.Dropout(0.3),
     tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(512, activation='relu'),
     tf.keras.layers.Dense(len(train_fish_classes), activation='softmax')  # 클래스 개수에 맞게 출력층 뉴런 수 조정
@@ -97,7 +112,7 @@ model.compile(optimizer=RMSprop(learning_rate=0.001),
 history = model.fit(train_generator,
                     validation_data=validation_generator,
                     steps_per_epoch=4,
-                    epochs=100,
+                    epochs=200,
                     validation_steps=4,
                     verbose=2)
 
@@ -147,11 +162,19 @@ for fish_class, filenames in test_fish_fnames.items():
 
         classes = model.predict(x)
 
-        fig.add_subplot(rows, cols, i + 1)
-        predicted_class_index = np.argmax(classes)
-        predicted_class = test_fish_classes[predicted_class_index]
+        # 가장 높은 확률을 가진 클래스의 인덱스와 확률을 가져옴
+        top_class_index = np.argmax(classes)
+        top_class_prob = np.max(classes)
 
-        plt.title(fn + " is " + predicted_class)
+        # 예측된 클래스의 이름 가져오기
+        predicted_class = test_fish_classes[top_class_index]
+
+        # 클래스별 확률을 표시할 문자열 생성
+        class_probs = "\n".join([f"{test_fish_classes[i]}: {prob * 100:.2f}%" for i, prob in enumerate(classes[0])])
+
+        # 이미지와 분류 결과 및 확률을 표시
+        fig.add_subplot(rows, cols, i + 1)
+        plt.title(f"{fn} is {predicted_class}\n\n{class_probs}")
         plt.axis('off')
         plt.imshow(test_img, cmap='gray')
     plt.show()
@@ -161,4 +184,5 @@ print("===== 모델 성능 평가 =====")
 model.evaluate(test_generator)
 
 # 모델 저장
-# model.save('fish_class_cnn.h5')
+print("모델 저장 완료")
+model.save('fish_class_cnn.h5')

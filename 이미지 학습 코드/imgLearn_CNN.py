@@ -1,16 +1,14 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-import tensorflow as tf
 import os
-import PIL
-import shutil
+
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
+from keras.api import layers
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.optimizers import RMSprop
+from keras.preprocessing import image
 
 # 차트 한글 표시
-import matplotlib.pyplot as plt
-from keras.api import layers
 plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
 
@@ -39,9 +37,6 @@ for fish_class in train_fish_classes:
     test_fish_fnames[fish_class] = os.listdir(os.path.join(test_dir, fish_class))
 
 # 이미지 데이터 전처리
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-
 # Image augmentation
 train_datagen = ImageDataGenerator(
     rescale=1. / 255,
@@ -66,41 +61,39 @@ test_datagen = ImageDataGenerator(rescale=1. / 255)
 
 # flow_from_directory() 메서드를 이용해서 훈련과 테스트에 사용될 이미지 데이터를 만들기
 train_generator = train_datagen.flow_from_directory(train_dir,
-                                                    batch_size=16,
-                                                    color_mode='grayscale',
+                                                    batch_size=64,
+                                                    color_mode='rgb',
                                                     class_mode='categorical',
                                                     target_size=(150, 150),
                                                     subset='training')
 
 validation_generator = train_datagen.flow_from_directory(train_dir,
-                                                         batch_size=4,
-                                                         color_mode='grayscale',
+                                                         batch_size=32,
+                                                         color_mode='rgb',
                                                          class_mode='categorical',
                                                          target_size=(150, 150),
                                                          subset='validation')
 
 test_generator = test_datagen.flow_from_directory(test_dir,
-                                                  batch_size=4,
-                                                  color_mode='grayscale',
+                                                  batch_size=32,
+                                                  color_mode='rgb',
                                                   class_mode='categorical',
                                                   target_size=(150, 150))
 
 # 합성곱 신경망 모델 구성하기
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Conv2D(16, (3, 3), activation='relu', input_shape=(150, 150, 1)),
+    tf.keras.layers.Conv2D(16, (3, 3), activation='relu', input_shape=(150, 150, 3)),
     tf.keras.layers.MaxPooling2D(2, 2),
     tf.keras.layers.Conv2D(32, (3, 3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2, 2),
     tf.keras.layers.Conv2D(32, (3, 3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2, 2),
-    layers.Dropout(0.3),
     tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(512, activation='relu'),
+    tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Dense(len(train_fish_classes), activation='softmax')  # 클래스 개수에 맞게 출력층 뉴런 수 조정
 ])
 model.summary()
-
-from tensorflow.keras.optimizers import RMSprop
 
 # compile() 메서드를 이용해서 손실 함수 (loss function)와 옵티마이저 (optimizer)를 지정
 model.compile(optimizer=RMSprop(learning_rate=0.001),
@@ -111,7 +104,7 @@ model.compile(optimizer=RMSprop(learning_rate=0.001),
 history = model.fit(train_generator,
                     validation_data=validation_generator,
                     steps_per_epoch=4,
-                    epochs=300,
+                    epochs=100,
                     validation_steps=4,
                     verbose=2)
 
@@ -144,7 +137,6 @@ plt.legend()
 plt.show()
 
 # 이제 테스트 이미지 분류
-from keras.preprocessing import image
 
 test_fish_classes = list(test_fish_fnames.keys())
 
@@ -154,7 +146,7 @@ for fish_class, filenames in test_fish_fnames.items():
     rows, cols = 1, 6
     for i, fn in enumerate(filenames):
         path = os.path.join(test_dir, fish_class, fn)
-        test_img = image.load_img(path, color_mode='grayscale', target_size=(150, 150), interpolation='bilinear')
+        test_img = image.load_img(path, color_mode='rgb', target_size=(150, 150), interpolation='bilinear')
         x = image.img_to_array(test_img)
         x = np.expand_dims(x, axis=0)
         x = x / 255.0

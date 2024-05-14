@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 import numpy as np
 
-image_path='train_dataset/test/림포시스티스병/림포시스티스병 넙치 4.jpg'
+image_path='train_dataset/test/연쇄구균병/연쇄구균병 강도다리 4.jpg'
 # 이미지를 분석하는 함수
 def analyze_image(image_path):
     # 각 모델의 경로 설정
@@ -28,12 +28,14 @@ def analyze_image(image_path):
         # 클래스 레이블 가져오기
         classes = ['림포시스티스병', '비브리오', '아가미흡충', '연쇄구균병']  # 클래스 레이블을 적절하게 수정
 
-        # 가장 높은 확률을 가진 클래스의 인덱스와 확률을 가져오기
-        top_class_index = np.argmax(prediction)
-        top_class_prob = np.max(prediction)
+        # 클래스 별 확률 가져오기
+        class_probabilities = {class_name: probability for class_name, probability in zip(classes, prediction[0])}
 
-        # 예측된 클래스와 해당 클래스의 확률을 튜플로 저장하여 리스트에 추가
-        result = (f"{['CNN', '전이학습', 'DNN'][idx]} 모델", classes[top_class_index], top_class_prob)
+        # 확률이 높은 순으로 정렬된 딕셔너리 생성
+        sorted_probabilities = dict(sorted(class_probabilities.items(), key=lambda item: item[1], reverse=True))
+
+        # 결과 튜플로 저장하여 리스트에 추가
+        result = (f"{['CNN', '전이학습', 'DNN'][idx]} 모델", sorted_probabilities)
         results.append(result)
 
     return results

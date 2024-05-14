@@ -26,14 +26,11 @@ train_datagen = ImageDataGenerator(
     fill_mode='nearest',  # 이미지 변환 후 생기는 빈 공간을 채우는 방법
     brightness_range=[0.5, 1.5],
     validation_split=0.2
-    # validation_set으로 쓸 데이터의 비율을 정한다.
-    # 만약 값이 정해져 있다면 후에 사용할 flow_from_directory나 flow_from_dataframe에서 파라미터 subset = 'training' 혹은 subset = 'validation'으로
-    # 훈련 데이터 셋과 검증 데이터 셋을 줄 수 있다.
 )
 # validation_datagen = ImageDataGenerator(rescale=1. / 255)
 test_datagen = ImageDataGenerator(rescale=1. / 255)
 
-batch_size = 64
+batch_size = 32
 img_width = 150
 img_height = 150
 
@@ -42,39 +39,23 @@ train_data = train_datagen.flow_from_directory(
     batch_size=batch_size,
     target_size=(img_width, img_height),
     shuffle=True,
-    subset='training'
+    subset='training',
+    class_mode='categorical'  # 클래스를 원-핫 인코딩합니다.
 )
 valid_data = train_datagen.flow_from_directory(
     './train_dataset/train',
     target_size=(img_width, img_height),
     batch_size=batch_size,
     shuffle=False,
-    subset='validation'
+    subset='validation',
+    class_mode='categorical'  # 클래스를 원-핫 인코딩합니다.
 )
 test_data = test_datagen.flow_from_directory(
     './train_dataset/test',
     target_size=(img_width, img_height),
     batch_size=batch_size,
+    class_mode='categorical'  # 클래스를 원-핫 인코딩합니다.
 )
-
-# 받아온 이미지 데이터 출력 함수
-def visualize_images(images, labels):
-    figure, ax = plt.subplots(nrows=3, ncols=3, figsize=(12, 14))
-    classes = list(train_data.class_indices.keys())
-    img_no = 0
-    for i in range(3):
-        for j in range(3):
-            img = images[img_no]
-            label_no = np.argmax(labels[img_no])
-
-            ax[i, j].imshow(img)
-            ax[i, j].set_title(classes[label_no])
-            ax[i, j].set_axis_off()
-            img_no += 1
-
-# 이미지 띄우기
-# images, labels = next(train_data)
-# visualize_images(images, labels)
 
 # 전이학습 실행
 base = MobileNetV2(input_shape=(img_width, img_height, 3), include_top=False, weights='imagenet')
@@ -84,8 +65,10 @@ model.add(base)
 model.add(GlobalAveragePooling2D())
 model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(2, activation='softmax'))
-opt = Adam(learning_rate=0.001)
+# 클래스의 수에 맞춰 출력 뉴런 수를 변경합니다.
+num_classes = len(train_data.class_indices)
+model.add(Dense(num_classes, activation='softmax'))
+opt = Adam(learning_rate=0.0005)
 model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
 
 reduce_lr = ReduceLROnPlateau(monitor='val_accuracy', patience=1, verbose=1)
@@ -126,7 +109,7 @@ test_fish_classes = os.listdir(test_dir)
 
 for fish_class in test_fish_classes:
     filenames = os.listdir(os.path.join(test_dir, fish_class))
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=(12, 8))
     rows, cols = 1, 6
     for i, fn in enumerate(filenames):
         path = os.path.join(test_dir, fish_class, fn)
@@ -142,10 +125,10 @@ for fish_class in test_fish_classes:
         top_class_prob = np.max(classes)
 
         # 예측된 클래스의 이름 가져오기
-        predicted_class = test_fish_classes[top_class_index]
+        predicted_class = list(train_data.class_indices.keys())[top_class_index]
 
         # 클래스별 확률을 표시할 문자열 생성
-        class_probs = "\n".join([f"{test_fish_classes[i]}: {prob * 100:.2f}%" for i, prob in enumerate(classes[0])])
+        class_probs = "\n".join([f"{list(train_data.class_indices.keys())[i]}: {prob * 100:.2f}%" for i, prob in enumerate(classes[0])])
 
         # 이미지와 분류 결과 및 확률을 표시
         fig.add_subplot(rows, cols, i + 1)

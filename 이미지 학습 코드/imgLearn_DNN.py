@@ -12,7 +12,7 @@ from keras.preprocessing import image
 plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
 
-# CNN모델
+# DNN모델
 
 # 기본 경로
 base_dir = 'train_dataset'
@@ -62,21 +62,21 @@ test_datagen = ImageDataGenerator(rescale=1. / 255)
 # flow_from_directory() 메서드를 이용해서 훈련과 테스트에 사용될 이미지 데이터를 만들기
 # 이미지 데이터를 로드하는 데이터 제너레이터 생성
 train_generator = train_datagen.flow_from_directory(train_dir,
-                                                    batch_size=64,
+                                                    batch_size=128,
                                                     color_mode='rgb',
                                                     class_mode='categorical',
                                                     target_size=(150, 150),
                                                     subset='training')
 
 validation_generator = train_datagen.flow_from_directory(train_dir,
-                                                         batch_size=32,
+                                                         batch_size=64,
                                                          color_mode='rgb',
                                                          class_mode='categorical',
                                                          target_size=(150, 150),
                                                          subset='validation')
 
 test_generator = test_datagen.flow_from_directory(test_dir,
-                                                  batch_size=32,
+                                                  batch_size=64,
                                                   color_mode='rgb',
                                                   class_mode='categorical',
                                                   target_size=(150, 150))
@@ -94,7 +94,7 @@ dnn_model = tf.keras.models.Sequential([
 dnn_model.summary()
 
 # 컴파일
-dnn_model.compile(optimizer=RMSprop(learning_rate=0.001),
+dnn_model.compile(optimizer=RMSprop(learning_rate=0.0005),
                    loss='categorical_crossentropy',
                    metrics=['accuracy'])
 
@@ -140,7 +140,7 @@ test_fish_classes = list(test_fish_fnames.keys())
 
 # 테스트 이미지 분류
 for fish_class, filenames in test_fish_fnames.items():
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=(12, 8))
     rows, cols = 1, 6
     for i, fn in enumerate(filenames):
         path = os.path.join(test_dir, fish_class, fn)

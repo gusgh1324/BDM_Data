@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 import numpy as np
 
-image_path='train_dataset/test/연쇄구균병/연쇄구균병 강도다리 4.jpg'
+image_path='train_dataset/test/아가미흡충/아가미흡충 농어 2.jpg'
 # 이미지를 분석하는 함수
 def analyze_image(image_path):
     # 각 모델의 경로 설정
@@ -37,6 +37,9 @@ def analyze_image(image_path):
         # 결과 튜플로 저장하여 리스트에 추가
         result = (f"{['CNN', '전이학습', 'DNN'][idx]} 모델", sorted_probabilities)
         results.append(result)
+
+        # 현재까지의 모델 분석 상태 출력
+        print(f"{idx + 1}/{len(model_paths)} 분석 완료")
 
     return results
 

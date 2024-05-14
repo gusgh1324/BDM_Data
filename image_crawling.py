@@ -6,7 +6,8 @@ import urllib.request
 import os
 
 # 검색쿼리
-searchKey = input('검색할 키워드 입력 :')
+searchKey = input('검색할 키워드 입력 : ')
+saveKey=input('파일로 저장할 키워드 입력 : ')
 
 
 # 폴더 생성
@@ -27,11 +28,10 @@ driver.get('https://www.google.co.kr/imghp')
 elem = driver.find_element('name', 'q')
 elem.send_keys(searchKey)
 elem.send_keys(Keys.RETURN)
-
 # 이미지 스크롤링
 while True:
     driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')  # 브라우저 끝까지 스크롤
-    time.sleep(2)  # 쉬어주기
+    time.sleep(1.5)  # 쉬어주기
     try:
         button = driver.find_element(By.XPATH, '//*[@id="islmp"]/div/div/div/div/div[1]/div[2]/div[2]/input')
         button.click()  # 스크롤을 내리다보면 '결과 더보기'가 있는 경우 버튼 클릭
@@ -55,7 +55,7 @@ for image in images:
         opener = urllib.request.build_opener()
         opener.addheaders = [('User-Agent', 'Mozilla/5.0')]  # https://docs.python.org/3/library/urllib.request.html 참고
         urllib.request.install_opener(opener)
-        urllib.request.urlretrieve(imgUrl, f'train_dataset/{searchKey}/{searchKey}_{str(count)}.jpg')  # url을
+        urllib.request.urlretrieve(imgUrl, f'train_dataset/{saveKey}/{saveKey}_{str(count)}.jpg')  # url을
         print(f'--{count}번째 이미지 저장 완료--')
         count = count + 1
     except Exception as e:

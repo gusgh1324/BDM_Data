@@ -31,7 +31,7 @@ def analyze_image(image_path):
         classes = ['림포시스티스병', '비브리오', '아가미흡충', '연쇄구균병']  # 클래스 레이블을 적절하게 수정
 
         # 클래스 별 확률 가져오기
-        class_probabilities = {class_name: float(probability) for class_name, probability in zip(classes, prediction[0])}
+        class_probabilities = {class_name: f"{probability * 100:.2f}" for class_name, probability in zip(classes, prediction[0])}
 
         # 결과 튜플로 저장하여 리스트에 추가
         result = (f"{['CNN', '전이학습', 'DNN'][idx]} 모델", class_probabilities)
@@ -42,11 +42,12 @@ def analyze_image(image_path):
 
     return results
 
+# 확률은 소숫점 둘째짜리 표시
 
 if __name__ == "__main__":
     # 이미지 분석 결과 출력
     result = analyze_image(image_path)
+    print(result)
     # 결과를 Python 리스트로 변환하여 JSON으로 직렬화
     json_result = json.dumps(result, default=lambda o: o.__dict__, indent=4)
     print(json_result)
-    print(result)

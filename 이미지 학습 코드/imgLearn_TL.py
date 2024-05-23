@@ -73,9 +73,8 @@ model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy
 
 reduce_lr = ReduceLROnPlateau(monitor='val_accuracy', patience=1, verbose=1)
 early_stop = EarlyStopping(monitor='val_accuracy', patience=5, verbose=1, restore_best_weights=True)
-check_point = ModelCheckpoint(filepath='fish_class_cnn.keras', monitor='val_accuracy', verbose=1, save_best_only=True)
 
-history = model.fit(train_data, epochs=50, validation_data=valid_data, callbacks=[early_stop, reduce_lr, check_point])
+history = model.fit(train_data, epochs=50, validation_data=valid_data, callbacks=[early_stop, reduce_lr])
 
 # 정확도 및 손실 시각화
 acc = history.history['accuracy']

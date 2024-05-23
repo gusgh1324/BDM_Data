@@ -45,3 +45,26 @@ CNN 모델 활용 이미지 분류(tensorflow)
 
 이미지 딥러닝(mete learning)
 : https://kalelpark.tistory.com/29
+
+
+
+
+
+전처리한 이미지 갯수를 측정하는 코드
+# train_datagen 객체의 flow() 메서드를 호출하여 이미지 데이터를 생성
+# batch_size는 한 번에 생성되는 이미지의 개수입니다.
+# 여기서는 예시로 batch_size를 1로 설정하여 한 번에 한 장씩 생성하도록 합니다.
+data_generator = train_datagen.flow_from_directory(
+    train_dir,
+    target_size=(150, 150),
+    batch_size=1,
+    class_mode=None,  # class_mode는 None으로 설정하여 이미지 데이터만 생성하도록 합니다.
+    shuffle=False  # shuffle을 False로 설정하여 순서대로 이미지를 생성하도록 합니다.
+)
+
+# flow() 메서드를 호출하여 생성된 이미지 수를 확인
+total_generated_images = 0
+for _ in data_generator:
+    total_generated_images += 1
+
+print("전처리 과정마다 생성되는 이미지 수:", total_generated_images)

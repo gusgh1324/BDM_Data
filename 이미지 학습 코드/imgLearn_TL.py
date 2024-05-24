@@ -58,6 +58,8 @@ test_data = test_datagen.flow_from_directory(
 )
 
 # 전이학습 실행
+# MobileNetV2 모델을 전이학습에 적용
+# 해당 모델은 작은 모델 크기와 낮은 연산 비용 대비 높은 성능을 보이는 모델이라 모바일 기기 등에 활용 가능
 base = MobileNetV2(input_shape=(img_width, img_height, 3), include_top=False, weights='imagenet')
 base.trainable = True
 model = Sequential()

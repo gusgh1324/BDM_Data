@@ -67,6 +67,7 @@ model.add(base)
 model.add(GlobalAveragePooling2D())
 model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
+model.summary()
 # 클래스의 수에 맞춰 출력 뉴런 수를 변경합니다.
 num_classes = len(train_data.class_indices)
 model.add(Dense(num_classes, activation='softmax'))
